@@ -12,11 +12,10 @@ export const links = {
 };
 
 export const quotes: string[] = [
-  "I have an approximate knowledge of many things.",
-  "Make it simple, but significant.",
-  "Ship, learn, iterate.",
-  "Calm is a superpower.",
-  "Design is the silent ambassador of your work.",
+  "A lifetime of glory is worth a moment of pain.",
+  "You’re free to make decisions but not free from the consequences.",
+  "Justice is merely a construct of the current powerbase.",
+  "The only history that is worth a tinker's damn is the history we make today.",
 ];
 
 export const experience = [

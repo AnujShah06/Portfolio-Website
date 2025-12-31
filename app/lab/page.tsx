@@ -543,9 +543,9 @@ export default function Page() {
           <div className={styles.contactStack}>
             <div className={styles.contactWide}>
               <div>
-                <div className={styles.contactEmail}>youremail@purdue.edu</div>
+                <div className={styles.contactEmail}>anujshah7567@gmail.com</div>
                 <div className={styles.contactNote}>
-                  I read everything. If it’s about a project, feel free to include a link — I’ll reply when I can.
+                  Feel free to reach out - I'll reply when I can.
                 </div>
               </div>
 
