@@ -202,7 +202,7 @@ function Section({
 }
 
 export default function Page() {
-  const sectionIds = ["home", "about", "experience", "projects", "gallery", "contact"] as const;
+  const sectionIds = ["home", "about", "experiences", "projects", "gallery", "contact"] as const;
   const active = useSectionSpy([...sectionIds]);
 
   const fullGreeting = `${hero.greetingPrefix} ${hero.name} ${hero.greetingSuffix}`;
@@ -240,13 +240,13 @@ export default function Page() {
           <div className={styles.topbarInner}>
             <Link href="#home" className={styles.brand} aria-label="Go to top">
               <div className={styles.dot} />
-              <div className={styles.brandName}>Anuj Saha</div>
+              <div className={styles.brandName}>Anuj Shah</div>
             </Link>
 
             <nav className={styles.nav} aria-label="Primary navigation">
               <Link href="#home" data-active={active === "home"}>Home</Link>
               <Link href="#about" data-active={active === "about"}>About</Link>
-              <Link href="#experience" data-active={active === "experience"}>Experience</Link>
+              <Link href="#experiences" data-active={active === "experiences"}>Experience</Link>
               <Link href="#projects" data-active={active === "projects"}>Projects</Link>
               <Link href="#gallery" data-active={active === "gallery"}>Gallery</Link>
               <Link href="#contact" data-active={active === "contact"}>Contact</Link>
@@ -281,18 +281,11 @@ export default function Page() {
               </div>
 
               <div className={styles.heroIntro}>
-                CS student at <span className={styles.accentSoft}>Purdue</span> building clean interfaces and{" "}
-                <span className={styles.accentSoft}>data-driven</span> tools.
+              I’m a <span className={styles.accent}>Computer Science</span> student at Purdue University with a concentration in <span className={styles.accent}>Machine Learning</span>. I enjoy learning the problems different industries face and buliding <span className={styles.accent}>data-driven</span> solutions to try my best in solving them. 
               </div>
 
               <div className={styles.heroSub}>
-                This is my little corner of the internet — projects, experiments, certificates, and whatever I’m learning along the way.
-              </div>
-
-              <div className={styles.ctaRow}>
-                <Link className={styles.primaryBtn} href="#projects">
-                  See projects →
-                </Link>
+                This is my little corner of the internet - projects, experiments, certificates, and whatever I’m learning along the way.
               </div>
             </div>
           </div>
@@ -301,25 +294,107 @@ export default function Page() {
         <Section
           id="about"
           navLabel="About"
-          label="/about"
-          title="A little about me"
-          subtitle="Short, honest, calm — the rest can grow over time."
+          label="/about_me"
+          title=""
+          subtitle=""
         >
-          <div className={styles.panel} style={{ marginTop: 16 }}>
+        <div
+          className={styles.aboutSplit}
+          style={{
+            marginTop: 16,
+            gridTemplateColumns: "1.35fr 0.65fr",
+            columnGap: 100,
+          }}
+        >
+          {/* Glass panel: text only */}
+          <div
+            className={`${styles.panel} ${styles.aboutPanel}`}
+            style={{ width: "100%", maxWidth: "unset" }}
+          >
             <div style={{ color: "rgba(255,255,255,0.74)", lineHeight: 1.85, maxWidth: "78ch" }}>
-              I’m Anuj, a CS student at Purdue. I like modern UI, clean engineering, and projects that make complicated
-              things feel simple. I’m building a habit of shipping, documenting what I learn, and iterating until it feels
-              effortless.
+              <p style={{ margin: 0 }}>
+                I’m currently a ML Data Engineer at Team ACP Racing where I'm building a Python ETL pipeline to capture live data to conduct race strategy adjustments.
+              </p>
+              <p style={{ margin: "12px 0 0 0" }}>
+                I'm currently in my junior year pursuing my bachelors in Computer Science at Purdue University.
+              </p>
+
+              <div
+                style={{
+                  marginTop: 14,
+                  paddingLeft: 12,
+                  borderLeft: "3px solid rgba(86, 198, 255, 0.9)",
+                  color: "rgba(255,255,255,0.82)",
+                }}
+              >
+                <span className={styles.accent}>Here are some technologies I work with often:</span>
+              </div>
+
+              <div
+                style={{
+                  marginTop: 12,
+                  display: "grid",
+                  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                  gap: 12,
+                  color: "rgba(255,255,255,0.72)",
+                }}
+              >
+                <ul style={{ margin: 0, paddingLeft: 50, listStyle: "none" }}>
+                  <li style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 0" }}>
+                    <span className={styles.dot} aria-hidden="true" />
+                    Python
+                  </li>
+                  <li style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 0" }}>
+                    <span className={styles.dot} aria-hidden="true" />
+                    Pandas / NumPy
+                  </li>
+                  <li style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 0" }}>
+                    <span className={styles.dot} aria-hidden="true" />
+                    scikit-learn
+                  </li>
+                </ul>
+
+                <ul style={{ margin: 0, paddingLeft: 0, listStyle: "none" }}>
+                  <li style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 0" }}>
+                    <span className={styles.dot} aria-hidden="true" />
+                    PyTorch
+                  </li>
+                  <li style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 0" }}>
+                    <span className={styles.dot} aria-hidden="true" />
+                    SQL
+                  </li>
+                  <li style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 0" }}>
+                    <span className={styles.dot} aria-hidden="true" />
+                    R
+                  </li>
+                </ul>
+              </div>
+
+              <p style={{ margin: "14px 0 0 0", color: "rgba(255,255,255,0.70)" }}>
+                Outside of work, you’ll usually find me hiking, playing anything that involves a racket or paddle, and catching Steelers games. Oh! I'm also an avid mixologist.
+              </p>
             </div>
           </div>
+
+          {/* Image: on background (NOT inside the glass panel) */}
+          <div className={styles.aboutPhotoWrap} aria-label="Portrait">
+            <img
+              className={styles.aboutPhoto}
+              src="/portraits/me.jpg"
+              alt="Portrait"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+        </div>
         </Section>
 
         <Section
-          id="experience"
-          navLabel="Experience"
-          label="/experience"
-          title="Experience (select to explore)"
-          subtitle="Pick one on the left — details show on the right."
+          id="experiences"
+          navLabel="Experiences"
+          label="/experiences"
+          title=""
+          subtitle=""
         >
           <div className={styles.expSplit}>
             <div className={styles.expIndex} aria-label="Experience index">
@@ -382,8 +457,8 @@ export default function Page() {
           id="projects"
           navLabel="Projects"
           label="/projects"
-          title="Projects (a small shelf)"
-          subtitle="Scroll the shelf. Click a card to load details."
+          title=""
+          subtitle=""
         >
           <div className={styles.projShelf}>
             <div className={styles.projRail} aria-label="Project shelf">
@@ -445,9 +520,9 @@ export default function Page() {
         <Section
           id="gallery"
           navLabel="Gallery"
-          label="/gallery"
-          title="Gallery (tiny strip)"
-          subtitle="Hover a tile — it grows."
+          label="/film_strip"
+          title=""
+          subtitle=""
         >
           <div className={styles.thumbRail} aria-label="Gallery thumbnails">
             {gallery.map((g) => (
@@ -461,9 +536,9 @@ export default function Page() {
         <Section
           id="contact"
           navLabel="Contact"
-          label="/contact"
-          title="Contact"
-          subtitle="If you want to reach me, email is best."
+          label="/say_hi!"
+          title=""
+          subtitle=""
         >
           <div className={styles.contactStack}>
             <div className={styles.contactWide}>

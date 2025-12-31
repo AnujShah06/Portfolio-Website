@@ -305,7 +305,7 @@
   margin-top: 14px;
   color: rgba(255,255,255,0.80);
   font-size: 16px;
-  line-height: 1.6;
+  line-height: 2;
   max-width: 66ch;
 }
 
@@ -372,7 +372,7 @@
 
 /* ✅ /section headers: bigger + blue */
 .h2 {
-  font-size: 16px;
+  font-size: 48px;
   font-weight: 700;
   letter-spacing: 0.01em;
   color: rgba(56,189,248,0.92);
@@ -722,6 +722,7 @@
   color: rgba(255,255,255,0.86);
 }
 
+
 .footer {
   margin-top: 44px;
   color: rgba(255,255,255,0.42);
@@ -730,4 +731,44 @@
   justify-content: center;
   align-items: center;
   text-align: center;
+}
+
+/* ===== About ===== */
+.aboutSplit {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+/* Glass panel should take ALL remaining space */
+.aboutPanel {
+  flex: 1 1 auto;
+  max-width: none;
+}
+
+/* Photo column should be only as wide as the photo, but keep the photo pinned right */
+.aboutPhotoWrap {
+  flex: 0 0 340px;
+  max-width: 340px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.aboutPhoto {
+  width: min(340px, 100%);
+  height: auto;
+  border-radius: 14px;
+  object-fit: cover;
+}
+
+@media (max-width: 860px) {
+  .aboutSplit {
+    flex-direction: column;
+  }
+
+  .aboutPhotoWrap {
+    flex: 0 0 auto;
+    max-width: 100%;
+    justify-content: flex-start;
+  }
 }

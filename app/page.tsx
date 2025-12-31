@@ -1,5 +1,5 @@
-import ExpGaziPage from "./lab/page";
+import LabPage from "./lab/page";
 
 export default function Page() {
-  return <ExpGaziPage />;
+  return <LabPage />;
 }

@@ -6,9 +6,9 @@ export const hero = {
 
 export const links = {
   // TODO: replace these with your real links
-  email: "mailto:youremail@purdue.edu",
-  github: "https://github.com/",
-  linkedin: "https://www.linkedin.com/",
+  email: "mailto:anujshah7567@gmail.com",
+  github: "https://github.com/AnujShah06",
+  linkedin: "https://www.linkedin.com/in/anuj-shah107/",
 };
 
 export const quotes: string[] = [
