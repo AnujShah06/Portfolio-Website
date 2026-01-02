@@ -40,11 +40,11 @@ export const experience = [
     time: "June 2025 - September 2025",
     location: "Indianapolis, IN",
     highlights: [
-      "Analyzed 300+ metrics using supervised learning (LightGBM, random forests) with k-fold cross-validation identifying critical KPIs",
+      "Analyzed 300+ metrics using supervised learning (random forests) with k-fold cross-validation identifying critical KPIs",
       "Integrated transformer LLM to parse proprietary expression language with custom syntax trees/rules, supporting 30+ teams",
       "Built BFS-based JSON mapping tool to traverse 20+ layer trees, generating optimal dot-notation queries from user parameters",
     ],
-    stack: ["R", "Statistics", "Data", "Visualization"],
+    stack: ["NumPy", "LightGBM", "Python", "RAG"],
     links: [],
   },
   {
@@ -52,11 +52,13 @@ export const experience = [
     orglabel: "CS240",
     role: "Teaching Assistant",
     time: "August 2025 - Present",
-    location: "Purdue University",
+    location: "West Lafayette, IN",
     highlights: [
-      "Guided weekly lab sections reinforcing C programming assignments; coach students on debugging, pointers, and memory usage",
+      "Led weekly lab sections reinforcing core systems concepts (pointers, memory management, structs, file I/O)",
+      "Coached students through debugging and tooling workflows using GDB and Linux CLI (breakpoints, stack traces, segmentation faults, valgrind-style memory reasoning)",
+      "Provided technical support at scale by hosting office hours, giving actionable feedback on assignments, and helping students develop clean coding habits",
     ],
-    stack: ["R", "Statistics", "Data", "Visualization"],
+    stack: ["C", "GDB", "Linux"],
     links: [],
   },
   {
@@ -64,13 +66,13 @@ export const experience = [
     orglabel: "INDI",
     role: "Research Intern",
     time: "January 2025 — June 2025",
-    location: "Purdue University",
+    location: "Indianapolis, IN",
     highlights: [
       "Debugged breath-simulation setup, finding 3 discrepancies that impaired volatile compound recognition and upstream data quality",
       "Researched breath-analysis technologies, identifying innovative detection approaches for specific health markers",
       "Designed and 3D-printed custom lab molds to standardize experimental setups and ensure precise, reproducible results",
     ],
-    stack: ["R", "Statistics", "Data", "Visualization"],
+    stack: ["BamboLabs Studio", "Chemometrics", "Experimental Design"],
     links: [],
   },
   {
@@ -78,13 +80,13 @@ export const experience = [
     orglabel: "V2X Security",
     role: "Undergraduate Data Science Researcher",
     time: "August 2024 — June 2025",
-    location: "Purdue University",
+    location: "West Lafayette, IN",
     highlights: [
       "Developed transformer-based LLM chatbot for defense troubleshooting, achieving 90% intent classification accuracy via PyTorch",
       "Implemented RAG pipeline with sentence-level embeddings and MongoDB vector database to process 13,000+ scanned documents",
       "Utilized transfer learning to fine-tune BERT/Llama models, integrating Tesseract OCR and NLP for text extraction/preprocessing",
     ],
-    stack: ["R", "Statistics", "Data", "Visualization"],
+    stack: ["Hugging Face Transformers", "PyTorch", "NLP", "Tessaract OCR"],
     links: [],
   },
   {
@@ -92,12 +94,12 @@ export const experience = [
     orglabel: "CS190",
     role: "Teaching Assistant",
     time: "August 2025 - Present",
-    location: "Purdue University",
+    location: "West Lafayette, IN",
     highlights: [
       "Taught over 120 undergraduates in weekly discussions on career preparation, resumes, interview skills, and professional branding",
       "Lectured on Spontaneous Networking and strategies college students can employ to develop their network",
     ],
-    stack: ["R", "Statistics", "Data", "Visualization"],
+    stack: ["Lecturer", "Interview Prep", "Mentoring"],
     links: [],
   },
 ];

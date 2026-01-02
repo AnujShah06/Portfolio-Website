@@ -406,6 +406,10 @@
   gap: 14px;
   width: 100%;
 }
+/* prevent grid children from stretching to match the tallest column */
+@media (min-width: 920px) {
+  .expSplit { align-items: start; }
+}
 
 
 .expIndex {
@@ -431,7 +435,7 @@
     content: "";
     position: absolute;
     top: 18px;
-    height: 50%;
+    height: 150px;
     left: calc(var(--expLeftCol) + (var(--expGap) / 2));
     width: 2px;
     border-radius: 999px;
@@ -466,26 +470,42 @@
 }
 /* Experience highlights: wrapped lines align with sentence start (not under arrow) */
 .hlItem {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
+  display: grid;
+  grid-template-columns: 18px 1fr; /* arrow lane + content lane */
+  column-gap: 14px;
+  align-items: start;
 }
 
-/* If you had an old pseudo-arrow on .hlItem, kill it to avoid double arrows */
-.hlItem::before {
-  content: none !important;
-}
+/* Arrow is rendered by the .hlIcon element (avoid pseudo-element conflicts) */
+.hlItem::before { content: none; }
 
 .hlIcon {
-  flex: 0 0 auto;
+  grid-column: 1;
   line-height: 1.1;
   margin-top: 2px;
 }
 
 .hlText {
-  flex: 1 1 auto;
-  min-width: 0; /* important for wrapping inside flex */
+  grid-column: 2;
+  min-width: 0; /* important for wrapping inside grid cell */
+
+  /* Put the skill "pills" inline after the bullet text */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
 }
+
+/* When tags are used inside a highlight line, keep them inline (no new line) */
+.hlText .tags {
+  margin-top: 0;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.hlText .tag { white-space: nowrap; }
+
 .expItem:hover { background: rgba(255,255,255,0.02); }
 .expItem:last-child { border-bottom: none; }
 
@@ -549,11 +569,8 @@
   color: rgba(255,255,255,0.58);
   line-height: 1.6;
 }
-.hlItem::before {
-  content: "→";
-  margin-right: 8px;
-  color: rgba(56,189,248,0.72);
-}
+/* Arrow is rendered by the .hlIcon element (not a pseudo-element) */
+.hlItem::before { content: none; }
 
 .tags {
   margin-top: 14px;
@@ -561,6 +578,8 @@
   flex-wrap: wrap;
   gap: 8px;
 }
+/* In Experience detail, align tag pills with highlight text (skip arrow lane) */
+.expDetail .tags { margin-left: 32px; }
 .tag {
   display: inline-flex;
   align-items: center;
