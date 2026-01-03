@@ -126,7 +126,7 @@ export const projects = [
       "Built interactive PPI radar display with 10 Hz animation, phosphor trail effects, and real-time track visualization; includes comprehensive test suite (5 component tests) and clean entry point with CLI arguments."
     ],
     tags: ["Python", "NumPy", "Kalman Filter", "Signal Processing", "Matplotlib", "OOP"],
-    link: { label: "GitHub", href: "https://github.com/AnujShah06?tab=overview&from=2026-01-01&to=2026-01-02" }
+    link: { label: "GitHub", href: "https://github.com/AnujShah06/radar-simulator" }
   },
   {
     title: "Java Chat Application",
