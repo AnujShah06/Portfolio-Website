@@ -121,10 +121,38 @@ function IconLinkedIn() {
 }
 
 function QuotePill() {
-  const items = useMemo(() => quotes, []);
+  const items = useMemo(() => {
+    const arr = [...quotes];
+    for (let j = arr.length - 1; j > 0; j--) {
+      const k = Math.floor(Math.random() * (j + 1));
+      [arr[j], arr[k]] = [arr[k], arr[j]];
+    }
+    return arr;
+  }, []);
+
+  // Match even if smart quotes/apostrophes differ.
+  const normalize = (s: string) =>
+    (s ?? "")
+      .trim()
+      .replace(/[“”]/g, '"')
+      .replace(/[’]/g, "'");
+
+  const authorByQuote = useMemo<Record<string, string>>(
+    () => ({
+      [normalize("A lifetime of glory is worth a moment of pain.")]: "Laura Hillenbrand",
+      [normalize("You’re free to make decisions but not free from the consequences.")]: "Ezra Taft Benson",
+      [normalize("Justice is merely a construct of the current powerbase.")]: "Darth Maul",
+      [normalize("The only history that is worth a tinker's damn is the history we make today.")]: "Henry Ford",
+      [normalize("Eternal vigilance is the price of liberty")]: "Wendell Phillips",
+    }),
+    []
+  );
+
   const [i, setI] = useState(0);
   const next = () => setI((v) => (v + 1) % items.length);
   const prev = () => setI((v) => (v - 1 + items.length) % items.length);
+
+  const author = authorByQuote[normalize(items[i])] ?? "";
 
   return (
     <div
@@ -140,30 +168,56 @@ function QuotePill() {
       }}
     >
       <div className={styles.quoteLine}>“{items[i]}”</div>
-      <span className={styles.sep}>—</span>
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <button
-          className={styles.quoteBtn}
-          onClick={(e) => {
-            e.stopPropagation();
-            prev();
-          }}
-          aria-label="Previous quote"
-          title="Previous"
-        >
-          {"<"}
-        </button>
-        <button
-          className={`${styles.quoteBtn} ${styles.quoteBtnPrimary}`}
-          onClick={(e) => {
-            e.stopPropagation();
-            next();
-          }}
-          aria-label="Next quote"
-          title="Next"
-        >
-          {">"}
-        </button>
+
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 12,
+          marginTop: 8,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+          <span className={styles.sep}>—</span>
+          <div
+            style={{
+              color: "rgba(255,255,255,0.72)",
+              fontSize: 12,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+            aria-label="Quote author"
+          >
+            {author}
+          </div>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <button
+            className={styles.quoteBtn}
+            onClick={(e) => {
+              e.stopPropagation();
+              prev();
+            }}
+            aria-label="Previous quote"
+            title="Previous"
+          >
+            {"<"}
+          </button>
+          <button
+            className={`${styles.quoteBtn} ${styles.quoteBtnPrimary}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              next();
+            }}
+            aria-label="Next quote"
+            title="Next"
+          >
+            {">"}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -565,7 +619,9 @@ export default function Page() {
               </div>
             </div>
 
-            <QuotePill />
+            <div style={{ marginBottom: 200 }}>
+              <QuotePill />
+            </div>
           </div>
         </Section>
 

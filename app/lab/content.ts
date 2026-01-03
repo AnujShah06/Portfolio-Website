@@ -107,37 +107,37 @@ export const experience = [
 
 export const projects = [
   {
-    title: "Stats Research Report",
-    desc: "Advanced statistical methods project with an R codebase and write-up.",
+    title: "Ames Housing Price Analysis",
+    desc: "Statistical and ML analysis of how basement, first-floor, and second-floor square footage differently impact home prices.",
     bullets: [
-      "Reproducible analysis with clear assumptions and checks.",
-      "Readable plots + a concise report format.",
-      "Easy to extend with new datasets.",
+      "Diagnosed multicollinearity (VIF > 100) and heteroscedasticity (Breusch-Pagan test); applied log transformation and bootstrap inference (2,000 reps) for robust standard errors.",
+      "Validated with 10-fold cross-validation and Extra Sum of Squares F-tests; extended with Elastic Net regularization (R² improved from 0.62 to 0.79).",
+      "Modular R codebase with reproducible figures, Shapiro-Wilk normality checks, and clear documentation.",
     ],
-    tags: ["R", "Stats", "Research"],
-    link: null as null | { label: string; href: string },
+    tags: ["R", "Regression", "Bootstrap", "Regularization", "Cross-Validation"],
+    link: { label: "GitHub", href: "https://github.com/AnujShah06/ML-ames-housing-analysis" },
   },
   {
-    title: "UI/Tooling Prototype",
-    desc: "A calm, minimal tool concept — fast, clean, and documented.",
+    title: "Radar Signal Processing Simulator",
+    desc: "Real-time radar simulation demonstrating signal processing pipelines, target detection algorithms, and multi-target tracking with Kalman filtering.",
     bullets: [
-      "Focused on interaction details and polish.",
-      "Optimized for readability and flow.",
-      "Shipped a simple demo users can click through.",
+      "Implemented 4-state Kalman filter (position + velocity) with prediction/update cycles; built track lifecycle management (tentative → confirmed → terminated) using nearest-neighbor data association.",
+      "Designed modular signal processing pipeline: radar range equation → noise filtering (moving average, exponential smoothing) → SNR-based threshold detection → clustering → target classification (aircraft/ship/weather).",
+      "Built interactive PPI radar display with 10 Hz animation, phosphor trail effects, and real-time track visualization; includes comprehensive test suite (5 component tests) and clean entry point with CLI arguments."
     ],
-    tags: ["React", "Next.js", "UI"],
-    link: null as null | { label: string; href: string },
+    tags: ["Python", "NumPy", "Kalman Filter", "Signal Processing", "Matplotlib", "OOP"],
+    link: { label: "GitHub", href: "https://github.com/AnujShah06?tab=overview&from=2026-01-01&to=2026-01-02" }
   },
   {
-    title: "Experiment Shelf",
-    desc: "Small experiments that help me learn (and stay consistent).",
+    title: "Java Chat Application",
+    desc: "Real-time client-server messaging system with Swing GUI and optional MySQL persistence.",
     bullets: [
-      "Short scoped builds I can finish quickly.",
-      "Notes + learnings attached to each.",
-      "A place for certificates and links.",
+      "Multi-threaded server using ConcurrentHashMap and ExecutorService for concurrent client handling; TCP sockets with Java serialization for message passing.",
+      "Swing GUI with live online status indicators, chat history, and user registration; falls back to in-memory storage when database unavailable.",
+      "Gradle build with configurable run tasks; supports environment-based database configuration for production deployment.",
     ],
-    tags: ["Learning", "Systems"],
-    link: null as null | { label: string; href: string },
+    tags: ["Java", "Sockets", "Swing", "MySQL", "Concurrency"],
+    link: { label: "GitHub", href: "https://github.com/AnujShah06/Chat-Application" },
   },
 ];
 
@@ -149,7 +149,7 @@ export const gallery = [
   { title: "PURDUE PETE!!!", src: "/gallery/pete.png" },
   { title: "MIRA Awards Tech Show ", src: "/gallery/mira.png" },
   { title: "Performance Racing Industry Convention", src: "/gallery/pri.png" },
-  { title: "International. Manufacturing and Technology Show in Chicago", src: "/gallery/imts.png" },
+  { title: "International Manufacturing and Technology Show in Chicago", src: "/gallery/imts.png" },
   { title: "First Day of College", src: "/gallery/firstday.png" },
   { title: "HS Graduation!!!", src: "/gallery/lastday.png" },
 ];
