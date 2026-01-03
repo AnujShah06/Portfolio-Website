@@ -121,14 +121,7 @@ function IconLinkedIn() {
 }
 
 function QuotePill() {
-  const items = useMemo(() => {
-    const arr = [...quotes];
-    for (let j = arr.length - 1; j > 0; j--) {
-      const k = Math.floor(Math.random() * (j + 1));
-      [arr[j], arr[k]] = [arr[k], arr[j]];
-    }
-    return arr;
-  }, []);
+  const items = useMemo(() => quotes, []);
 
   // Match even if smart quotes/apostrophes differ.
   const normalize = (s: string) =>
