@@ -565,7 +565,7 @@ export default function Page() {
                 className={styles.galleryPreviewImg}
                 src={gItem.src}
                 alt={gItem.title}
-                loading="eager"
+                loading="lazy"
                 decoding="async"
               />
               <div className={styles.galleryPreviewLabel}>{gItem.title}</div>
