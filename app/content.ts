@@ -20,7 +20,7 @@ export const profile = {
   gpa: "3.78",
   location: "West Lafayette, IN",
   citizenship: "US Citizen",
-  clearance: "Active Secret Clearance",
+  clearance: "Clearance",
   objective:
     "Seeking a software / machine learning internship in the defense industry.",
 };
@@ -35,7 +35,7 @@ export const links = {
 /** Small HUD chips rendered next to the hero. */
 export const statusChips = [
   { label: "US Citizen", tone: "cyan" },
-  { label: "Active Secret Clearance", tone: "cyan" },
+  { label: "Clearance", tone: "cyan" },
   { label: "West Lafayette, IN", tone: "dim" },
   { label: "Open to Summer '27", tone: "green" },
 ];
@@ -125,7 +125,7 @@ export const credentials = [
     detail: "Merit award, Purdue University",
   },
   {
-    title: "Active Secret Clearance",
+    title: "Clearance",
     detail: "US Citizen · Department of War sponsored",
   },
   {

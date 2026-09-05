@@ -989,7 +989,7 @@
    Additions: hero HUD, telemetry, skills, education, credentials
    ============================================================ */
 
-/* --- Portrait: parallax container + sweeping beam --- */
+/* --- Portrait: parallax container --- */
 .portraitTilt {
   position: absolute;
   inset: 0;
@@ -1002,42 +1002,7 @@
   will-change: transform;
 }
 
-.portraitBeam {
-  position: absolute;
-  left: -2%;
-  right: -2%;
-  height: 16%;
-  z-index: 3;
-  pointer-events: none;
-  opacity: 0.55;
-  mix-blend-mode: screen;
-  background: linear-gradient(
-    180deg,
-    transparent,
-    rgba(125, 211, 252, 0.32),
-    rgba(56, 189, 248, 0.1),
-    transparent
-  );
-
-  -webkit-mask-image: var(--portraitMask);
-  mask-image: var(--portraitMask);
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-  mask-position: center;
-  -webkit-mask-size: contain;
-  mask-size: contain;
-
-  animation: portraitBeamSweep 5.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-}
-@keyframes portraitBeamSweep {
-  0%   { top: -20%; opacity: 0; }
-  12%  { opacity: 0.55; }
-  88%  { opacity: 0.55; }
-  100% { top: 108%; opacity: 0; }
-}
 @media (prefers-reduced-motion: reduce) {
-  .portraitBeam { display: none; }
   .portraitTilt { transform: none; }
 }
 

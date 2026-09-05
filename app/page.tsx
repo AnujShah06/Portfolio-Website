@@ -164,7 +164,6 @@ function HoloPortrait() {
           decoding="async"
         />
         <div className={styles.portraitScan} aria-hidden="true" />
-        <div className={styles.portraitBeam} aria-hidden="true" />
       </div>
     </div>
   );
