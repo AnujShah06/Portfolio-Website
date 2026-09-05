@@ -376,6 +376,8 @@
   font-weight: 700;
   letter-spacing: 0.01em;
   color: rgba(56,189,248,0.92);
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .h3 {
   margin-top: 10px;
@@ -742,10 +744,14 @@
   background: rgba(255,255,255,0.03);
   padding: 16px;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 14px;
 }
 @media (min-width: 900px) {
-  .contactWide { grid-template-columns: 1.4fr 1fr; align-items: center; }
+  .contactWide {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    align-items: center;
+  }
 }
 
 .contactEmail { font-size: 18px; font-weight: 750; color: rgba(255,255,255,0.90); }
@@ -772,9 +778,16 @@
   background: rgba(56,189,248,0.08);
 }
 
-.contactStack { margin-top: 16px; display: grid; gap: 10px; }
+.contactStack {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+}
 
 .quotePill {
+  min-width: 0;
+  max-width: 100%;
   border-radius: 999px;
   padding: 12px 14px;
   background: rgba(255,255,255,0.035);
@@ -971,3 +984,444 @@
   }
 }
 
+
+/* ============================================================
+   Additions: hero HUD, telemetry, skills, education, credentials
+   ============================================================ */
+
+/* --- Portrait: parallax container + sweeping beam --- */
+.portraitTilt {
+  position: absolute;
+  inset: 0;
+  transform:
+    perspective(900px)
+    rotateX(var(--rx, 0deg))
+    rotateY(var(--ry, 0deg))
+    translate3d(var(--px, 0px), var(--py, 0px), 0);
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.portraitBeam {
+  position: absolute;
+  left: -2%;
+  right: -2%;
+  height: 16%;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0.55;
+  mix-blend-mode: screen;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgba(125, 211, 252, 0.32),
+    rgba(56, 189, 248, 0.1),
+    transparent
+  );
+
+  -webkit-mask-image: var(--portraitMask);
+  mask-image: var(--portraitMask);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+
+  animation: portraitBeamSweep 5.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+@keyframes portraitBeamSweep {
+  0%   { top: -20%; opacity: 0; }
+  12%  { opacity: 0.55; }
+  88%  { opacity: 0.55; }
+  100% { top: 108%; opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .portraitBeam { display: none; }
+  .portraitTilt { transform: none; }
+}
+
+/* --- Rotating role line --- */
+.roleLine {
+  margin-top: 12px;
+  font-size: clamp(13px, 1.6vw, 17px);
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.62);
+  min-height: 26px;
+}
+.roleBracket {
+  color: rgba(56, 189, 248, 0.55);
+  font-weight: 600;
+}
+.roleBracket:first-child { margin-right: 8px; }
+.roleBracket:last-child { margin-left: 8px; }
+.roleText {
+  color: rgba(125, 211, 252, 0.92);
+  min-width: 26ch;
+  text-align: left;
+  vertical-align: top;
+  /* mid-scramble glyph runs have no spaces — let them break rather than
+     widening the page for a few frames */
+  overflow-wrap: anywhere;
+}
+@media (max-width: 640px) {
+  /* let the phrase wrap inside its own box instead of pushing the bracket */
+  .roleText { min-width: 0; max-width: calc(100% - 40px); }
+}
+
+/* --- Status chips --- */
+.chips {
+  margin-top: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.035);
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 12px;
+  letter-spacing: 0.01em;
+  transition: transform 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+.chip:hover {
+  transform: translateY(-2px);
+  color: rgba(255, 255, 255, 0.92);
+}
+.chipDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.4);
+  flex: 0 0 auto;
+}
+.chipCyan { border-color: rgba(56, 189, 248, 0.28); }
+.chipCyan .chipDot {
+  background: rgba(56, 189, 248, 0.95);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.7);
+}
+.chipGreen { border-color: rgba(74, 222, 128, 0.26); }
+.chipGreen .chipDot {
+  background: rgba(74, 222, 128, 0.95);
+  box-shadow: 0 0 10px rgba(74, 222, 128, 0.6);
+  animation: chipPulse 2.2s ease-in-out infinite;
+}
+@keyframes chipPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.45; transform: scale(0.8); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chipGreen .chipDot { animation: none; }
+}
+
+/* --- Ghost / secondary button --- */
+.ghostBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 14px;
+  cursor: pointer;
+  transition: transform 140ms ease, border-color 140ms ease,
+    background 140ms ease, color 140ms ease;
+}
+.ghostBtn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(56, 189, 248, 0.35);
+  background: rgba(56, 189, 248, 0.07);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+/* --- Telemetry strip --- */
+.telemetry {
+  margin-top: 44px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
+}
+.telItem {
+  padding: 16px 14px;
+  background: rgba(8, 14, 27, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: background 220ms ease;
+}
+.telItem:hover { background: rgba(56, 189, 248, 0.07); }
+.telValue {
+  font-size: clamp(20px, 2.4vw, 27px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: rgba(125, 211, 252, 0.95);
+  line-height: 1.1;
+}
+.telLabel {
+  margin-top: 7px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+  line-height: 1.5;
+}
+
+/* --- Section header decoration --- */
+.h2Row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.h2Rule {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(56, 189, 248, 0.45),
+    rgba(56, 189, 248, 0.05) 70%,
+    transparent
+  );
+}
+.h2Index {
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.28);
+  flex: 0 0 auto;
+}
+
+/* --- Skills --- */
+.skillMarquees {
+  margin-top: 26px;
+  display: grid;
+  gap: 10px;
+}
+
+.skillGrid {
+  margin-top: 26px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 14px;
+}
+.skillGroup {
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.025);
+  padding: 14px;
+  transition: border-color 200ms ease, background 200ms ease,
+    transform 200ms ease;
+}
+.skillGroup:hover {
+  border-color: rgba(56, 189, 248, 0.3);
+  background: rgba(56, 189, 248, 0.045);
+  transform: translateY(-3px);
+}
+.skillGroupName {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(56, 189, 248, 0.75);
+}
+.skillItems {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+/* --- Education / credentials --- */
+.eduGrid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+@media (min-width: 900px) {
+  .eduGrid { grid-template-columns: 1fr 1fr; align-items: start; }
+}
+
+.eduCard {
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 18px;
+}
+.eduSchool {
+  font-size: 20px;
+  font-weight: 720;
+  letter-spacing: -0.01em;
+  color: rgba(255, 255, 255, 0.92);
+}
+.eduDegree {
+  margin-top: 8px;
+  color: rgba(56, 189, 248, 0.85);
+  font-weight: 620;
+}
+.eduRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 9px 0;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+  font-size: 14px;
+}
+.eduRow:last-child { border-bottom: none; }
+.eduKey {
+  color: rgba(255, 255, 255, 0.44);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 11px;
+  align-self: center;
+}
+.eduVal { color: rgba(255, 255, 255, 0.86); text-align: right; }
+
+.courseChips {
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.courseChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12.5px;
+  transition: color 160ms ease, border-color 160ms ease, transform 160ms ease,
+    background 160ms ease;
+}
+.courseChip:hover {
+  color: rgba(255, 255, 255, 0.95);
+  border-color: rgba(56, 189, 248, 0.4);
+  background: rgba(56, 189, 248, 0.08);
+  transform: translateY(-2px);
+}
+
+.credList { margin-top: 4px; display: grid; gap: 10px; }
+.credItem {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: 12px;
+  align-items: start;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.025);
+  transition: border-color 180ms ease, background 180ms ease,
+    transform 180ms ease;
+}
+.credItem:hover {
+  border-color: rgba(56, 189, 248, 0.3);
+  background: rgba(56, 189, 248, 0.05);
+  transform: translateX(4px);
+}
+.credMark { color: rgba(56, 189, 248, 0.8); font-size: 13px; line-height: 1.5; }
+.credTitle { color: rgba(255, 255, 255, 0.88); font-weight: 620; font-size: 14.5px; }
+.credDetail {
+  margin-top: 4px;
+  color: rgba(255, 255, 255, 0.48);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+/* --- Gallery preview crossfade --- */
+.galleryPreviewImg {
+  animation: galleryFade 420ms ease both;
+}
+@keyframes galleryFade {
+  from { opacity: 0; transform: scale(1.03); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .galleryPreviewImg { animation: none; }
+}
+
+/* --- Experience: active-role meta line --- */
+.expMeta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+}
+.expLive {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(74, 222, 128, 0.3);
+  color: rgba(74, 222, 128, 0.9);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.expLiveDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(74, 222, 128, 0.95);
+  animation: chipPulse 2s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .expLiveDot { animation: none; }
+}
+
+/* --- Experience index: counter prefix --- */
+.expNum {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: rgba(255, 255, 255, 0.26);
+  display: block;
+  margin-bottom: 4px;
+  text-align: center;
+}
+.expItemActive .expNum { color: rgba(56, 189, 248, 0.8); }
+
+/* --- About photo tilt wrapper --- */
+.aboutPhotoTilt {
+  border-radius: 14px;
+  overflow: hidden;
+  line-height: 0;
+}
+
+/* --- Transient toast --- */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  z-index: 190;
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(56, 189, 248, 0.32);
+  background: rgba(10, 17, 32, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 12.5px;
+  letter-spacing: 0.04em;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5),
+    0 0 30px rgba(56, 189, 248, 0.12);
+  animation: toastIn 260ms cubic-bezier(0.2, 0.9, 0.25, 1) both;
+  pointer-events: none;
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translate(-50%, 12px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .toast { animation: none; }
+}

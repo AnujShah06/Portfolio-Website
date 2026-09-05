@@ -1,0 +1,675 @@
+/* ============================================================
+   fx.module.css — shared styles for the interactive layer
+   ============================================================ */
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  letter-spacing: 0.02em;
+}
+
+/* ===== Neural field canvas ===== */
+.field {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 900ms ease;
+}
+.fieldReady {
+  opacity: 1;
+}
+
+/* ===== Cursor glow + reticle ===== */
+.cursorGlow,
+.cursorRing {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 60;
+  pointer-events: none;
+  will-change: transform;
+  opacity: 0;
+  transition: opacity 400ms ease;
+}
+.cursorLive {
+  opacity: 1;
+}
+
+.cursorGlow {
+  width: 520px;
+  height: 520px;
+  margin: -260px 0 0 -260px;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle,
+    rgba(56, 189, 248, 0.1),
+    rgba(56, 189, 248, 0.045) 38%,
+    transparent 66%
+  );
+  filter: blur(6px);
+  mix-blend-mode: screen;
+}
+
+.cursorRing {
+  width: 30px;
+  height: 30px;
+  margin: -15px 0 0 -15px;
+  border-radius: 999px;
+  border: 1px solid rgba(56, 189, 248, 0.55);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.25),
+    inset 0 0 8px rgba(56, 189, 248, 0.12);
+  transition: opacity 400ms ease, width 180ms ease, height 180ms ease,
+    margin 180ms ease, border-color 180ms ease, border-radius 180ms ease;
+}
+
+/* Reticle ticks — the little HUD crosshair marks */
+.cursorRing::before,
+.cursorRing::after {
+  content: "";
+  position: absolute;
+  background: rgba(56, 189, 248, 0.7);
+}
+.cursorRing::before {
+  left: 50%;
+  top: -7px;
+  width: 1px;
+  height: 5px;
+  transform: translateX(-50%);
+}
+.cursorRing::after {
+  left: 50%;
+  bottom: -7px;
+  width: 1px;
+  height: 5px;
+  transform: translateX(-50%);
+}
+
+.cursorRingHot {
+  width: 56px;
+  height: 56px;
+  margin: -28px 0 0 -28px;
+  border-color: rgba(56, 189, 248, 0.9);
+  border-radius: 14px;
+}
+
+@media (pointer: coarse) {
+  .cursorGlow,
+  .cursorRing {
+    display: none;
+  }
+}
+
+/* ===== Scroll progress ===== */
+.progressTrack {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 70;
+  background: transparent;
+  pointer-events: none;
+}
+.progressBar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(
+    90deg,
+    rgba(56, 189, 248, 0.15),
+    rgba(56, 189, 248, 0.95) 60%,
+    rgba(168, 85, 247, 0.9)
+  );
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.6);
+  transition: width 90ms linear;
+}
+
+/* ===== Section spine (right-hand HUD rail) ===== */
+.spine {
+  position: fixed;
+  right: 22px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 45;
+  display: none;
+  flex-direction: column;
+  gap: 14px;
+  align-items: flex-end;
+}
+@media (min-width: 1320px) {
+  .spine {
+    display: flex;
+  }
+}
+
+.spineItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 2px 0;
+  color: rgba(255, 255, 255, 0.34);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transition: color 200ms ease;
+}
+.spineLabel {
+  opacity: 0;
+  transform: translateX(6px);
+  transition: opacity 220ms ease, transform 220ms ease;
+  white-space: nowrap;
+}
+.spineItem:hover .spineLabel,
+.spineActive .spineLabel {
+  opacity: 1;
+  transform: translateX(0);
+}
+.spineItem:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+.spineTick {
+  width: 22px;
+  height: 2px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  transition: width 240ms ease, background 240ms ease, box-shadow 240ms ease;
+}
+.spineActive {
+  color: rgba(56, 189, 248, 0.92);
+}
+.spineActive .spineTick {
+  width: 40px;
+  background: rgba(56, 189, 248, 0.9);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.55);
+}
+
+/* ===== Boot sequence ===== */
+.boot {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: #05090f;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  transition: opacity 620ms ease, transform 620ms ease, filter 620ms ease;
+}
+.bootOut {
+  opacity: 0;
+  filter: blur(8px);
+  pointer-events: none;
+}
+/* scale the inner block, not the viewport-sized overlay — scaling the overlay
+   pushes past the viewport and flashes a horizontal scrollbar on narrow screens */
+.bootOut .bootInner {
+  transform: scale(1.06);
+}
+.bootScan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(56, 189, 248, 0.05) 0px,
+    rgba(56, 189, 248, 0.05) 1px,
+    transparent 2px,
+    transparent 4px
+  );
+  opacity: 0.5;
+}
+.bootGlow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    720px 420px at 50% 45%,
+    rgba(56, 189, 248, 0.12),
+    transparent 68%
+  );
+}
+.bootInner {
+  position: relative;
+  width: min(560px, 100%);
+  transition: transform 620ms ease;
+}
+.bootLine {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  font-size: 13px;
+  line-height: 2;
+  color: rgba(255, 255, 255, 0.62);
+  white-space: nowrap;
+}
+.bootCaret {
+  flex: 0 0 auto;
+  color: rgba(56, 189, 248, 0.9);
+}
+.bootText {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+.bootOk {
+  flex: 0 0 auto;
+  color: rgba(74, 222, 128, 0.92);
+  margin-left: auto;
+  font-size: 12px;
+}
+@media (max-width: 480px) {
+  .bootLine { font-size: 11px; gap: 8px; }
+  .bootOk { font-size: 10px; }
+}
+.bootBarTrack {
+  margin-top: 20px;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+.bootBarFill {
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(56, 189, 248, 0.9),
+    rgba(168, 85, 247, 0.85)
+  );
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.5);
+  transition: width 160ms linear;
+}
+.bootSkip {
+  margin-top: 14px;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.28);
+  text-align: right;
+}
+
+/* ===== Command palette ===== */
+.paletteBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 180;
+  background: rgba(4, 8, 16, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: grid;
+  align-items: start;
+  justify-items: center;
+  padding: 12vh 20px 20px;
+  animation: fxFade 180ms ease both;
+}
+.palette {
+  width: min(620px, 100%);
+  border-radius: 18px;
+  border: 1px solid rgba(56, 189, 248, 0.24);
+  background: rgba(10, 17, 32, 0.94);
+  box-shadow: 0 40px 120px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 0 60px rgba(56, 189, 248, 0.08);
+  overflow: hidden;
+  animation: fxPop 220ms cubic-bezier(0.2, 0.9, 0.25, 1) both;
+}
+.paletteInputRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.palettePrompt {
+  color: rgba(56, 189, 248, 0.9);
+  font-size: 14px;
+}
+.paletteInput {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 15px;
+}
+.paletteInput::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+.paletteList {
+  max-height: 46vh;
+  overflow-y: auto;
+  padding: 8px;
+}
+.paletteGroup {
+  padding: 10px 12px 6px;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.3);
+}
+.paletteItem {
+  width: 100%;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 14px;
+  cursor: pointer;
+}
+.paletteItemActive {
+  background: rgba(56, 189, 248, 0.12);
+  color: rgba(255, 255, 255, 0.96);
+  box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.22);
+}
+.paletteIcon {
+  width: 22px;
+  text-align: center;
+  color: rgba(56, 189, 248, 0.8);
+  font-size: 13px;
+}
+.paletteHintKey {
+  margin-left: auto;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.3);
+}
+.paletteEmpty {
+  padding: 26px 14px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.38);
+  font-size: 13px;
+}
+.paletteFooter {
+  display: flex;
+  gap: 16px;
+  padding: 10px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.32);
+}
+
+/* Floating hint button that opens the palette */
+.kbdHint {
+  position: fixed;
+  left: 20px;
+  bottom: 20px;
+  z-index: 55;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 13px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(10, 17, 32, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+  cursor: pointer;
+  transition: transform 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+.kbdHint:hover {
+  transform: translateY(-2px);
+  border-color: rgba(56, 189, 248, 0.4);
+  color: rgba(255, 255, 255, 0.9);
+}
+/* no keyboard shortcut to advertise on touch / small screens */
+@media (max-width: 900px), (pointer: coarse) {
+  .kbdHint { display: none; }
+}
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+@keyframes fxFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes fxPop {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ===== Tilt card ===== */
+.tilt {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 320ms cubic-bezier(0.2, 0.8, 0.3, 1);
+  will-change: transform;
+}
+.tiltActive {
+  transition: transform 90ms linear;
+}
+.tiltSheen {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 260ms ease;
+  background: radial-gradient(
+    320px 220px at var(--mx, 50%) var(--my, 50%),
+    rgba(56, 189, 248, 0.16),
+    transparent 62%
+  );
+}
+.tiltSheenOn {
+  opacity: 1;
+}
+
+/* ===== Marquee ===== */
+.marquee {
+  position: relative;
+  overflow: hidden;
+  mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 8%,
+    #000 92%,
+    transparent
+  );
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 8%,
+    #000 92%,
+    transparent
+  );
+}
+.marqueeTrack {
+  display: flex;
+  width: max-content;
+  gap: 10px;
+  animation: marqueeSlide var(--marquee-duration, 46s) linear infinite;
+}
+.marqueeReverse .marqueeTrack {
+  animation-direction: reverse;
+}
+.marquee:hover .marqueeTrack {
+  animation-play-state: paused;
+}
+.marqueeChip {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.035);
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 12.5px;
+  white-space: nowrap;
+  transition: color 180ms ease, border-color 180ms ease, background 180ms ease,
+    transform 180ms ease;
+}
+.marqueeChip:hover {
+  color: rgba(255, 255, 255, 0.95);
+  border-color: rgba(56, 189, 248, 0.45);
+  background: rgba(56, 189, 248, 0.1);
+  transform: translateY(-2px);
+}
+@keyframes marqueeSlide {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+/* ===== Magnetic wrapper ===== */
+.magnetic {
+  display: inline-flex;
+  will-change: transform;
+  transition: transform 340ms cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+.magneticActive {
+  transition: transform 90ms linear;
+}
+
+/* ===== Grid overlay (toggleable from the palette) ===== */
+.gridOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background-image: linear-gradient(
+      rgba(56, 189, 248, 0.09) 1px,
+      transparent 1px
+    ),
+    linear-gradient(90deg, rgba(56, 189, 248, 0.09) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(
+    circle at var(--gx, 50%) var(--gy, 50%),
+    #000,
+    transparent 55%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle at var(--gx, 50%) var(--gy, 50%),
+    #000,
+    transparent 55%
+  );
+  animation: fxFade 400ms ease both;
+}
+
+/* ===== Radar sweep easter egg ===== */
+.radar {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  pointer-events: none;
+  display: grid;
+  place-items: center;
+  animation: fxFade 300ms ease both;
+}
+.radarDisc {
+  width: min(72vmin, 620px);
+  height: min(72vmin, 620px);
+  border-radius: 999px;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 80px rgba(56, 189, 248, 0.18);
+  background: radial-gradient(
+    circle,
+    rgba(56, 189, 248, 0.06),
+    transparent 70%
+  );
+}
+.radarDisc::before,
+.radarDisc::after {
+  content: "";
+  position: absolute;
+  inset: 22%;
+  border-radius: 999px;
+  border: 1px solid rgba(56, 189, 248, 0.18);
+}
+.radarDisc::after {
+  inset: 40%;
+}
+.radarSweep {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: conic-gradient(
+    from 0deg,
+    rgba(56, 189, 248, 0.42),
+    rgba(56, 189, 248, 0.12) 22%,
+    transparent 40%
+  );
+  animation: radarSpin 2.4s linear infinite;
+}
+@keyframes radarSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===== Reveal-on-scroll for FX-driven blocks ===== */
+.riseItem {
+  opacity: 0;
+  transform: translateY(16px);
+  filter: blur(5px);
+  transition: opacity 680ms cubic-bezier(0.2, 0.8, 0.3, 1),
+    transform 680ms cubic-bezier(0.2, 0.8, 0.3, 1), filter 680ms ease;
+  transition-delay: var(--rise-delay, 0ms);
+}
+.riseIn {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marqueeTrack {
+    animation: none;
+  }
+  .radarSweep {
+    animation: none;
+  }
+  .tilt,
+  .magnetic {
+    transform: none !important;
+    transition: none;
+  }
+  .riseItem {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
+  }
+  .boot,
+  .paletteBackdrop,
+  .palette,
+  .gridOverlay,
+  .radar {
+    animation: none;
+  }
+}

@@ -1,9 +1,39 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styles from "./styles.module.css";
-import { experience, gallery, hero, links, projects, quotes } from "./content";
+import fx from "./components/fx.module.css";
+import {
+  coursework,
+  credentials,
+  experience,
+  gallery,
+  hero,
+  links,
+  profile,
+  projects,
+  quotes,
+  roles,
+  skillGroups,
+  skillTicker,
+  statusChips,
+  telemetry,
+} from "./content";
+
+import NeuralField from "./components/NeuralField";
+import CursorGlow from "./components/CursorGlow";
+import ScrollProgress from "./components/ScrollProgress";
+import SectionSpine from "./components/SectionSpine";
+import BootSequence from "./components/BootSequence";
+import ScrambleText from "./components/ScrambleText";
+import Tilt from "./components/Tilt";
+import Magnetic from "./components/Magnetic";
+import Counter from "./components/Counter";
+import Marquee from "./components/Marquee";
+import Rise from "./components/Rise";
+import CommandPalette, { type Command } from "./components/CommandPalette";
+import { GridOverlay, RadarSweep, useTypedCode } from "./components/Overlays";
 
 function useInView<T extends HTMLElement>(options?: IntersectionObserverInit) {
   const ref = useRef<T | null>(null);
@@ -30,36 +60,94 @@ function useInView<T extends HTMLElement>(options?: IntersectionObserverInit) {
   return { ref, inView };
 }
 
+/**
+ * Marks the last section whose top has crossed a line a third of the way down
+ * the viewport. Scroll position rather than intersection ratio, so the very
+ * large gaps between sections can't hand the highlight to a taller neighbour.
+ */
 function useSectionSpy(sectionIds: string[]) {
   const [active, setActive] = useState(sectionIds[0] ?? "home");
 
   useEffect(() => {
-    const els = sectionIds
-      .map((id) => document.getElementById(id))
-      .filter(Boolean) as HTMLElement[];
+    let raf = 0;
 
-    if (!els.length) return;
+    const measure = () => {
+      raf = 0;
+      const line = window.innerHeight * 0.34;
+      let current = sectionIds[0];
 
-    const obs = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => (b.intersectionRatio ?? 0) - (a.intersectionRatio ?? 0));
-        if (visible[0]?.target?.id) setActive(visible[0].target.id);
-      },
-      { threshold: [0.15, 0.25, 0.35, 0.45], rootMargin: "-20% 0px -65% 0px" }
-    );
+      for (const id of sectionIds) {
+        const el = document.getElementById(id);
+        if (!el) continue;
+        if (el.getBoundingClientRect().top <= line) current = id;
+      }
 
-    els.forEach((el) => obs.observe(el));
-    return () => obs.disconnect();
+      // at the very bottom nothing else can cross the line — pin to the last
+      const atEnd =
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 4;
+      if (atEnd) current = sectionIds[sectionIds.length - 1];
+
+      setActive(current);
+    };
+
+    const onScroll = () => {
+      if (!raf) raf = window.requestAnimationFrame(measure);
+    };
+
+    measure();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
   }, [sectionIds]);
 
   return active;
 }
 
+/** Hologram portrait that leans toward the cursor. */
 function HoloPortrait() {
-  // Put this in: public/portraits/holo3_cutout.png
   const src = "/portraits/holo3_cutout.png";
+  const wrapRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    if (window.matchMedia("(pointer: coarse)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    let tx = 0;
+    let ty = 0;
+    let cx = 0;
+    let cy = 0;
+    let raf = 0;
+
+    const onMove = (e: PointerEvent) => {
+      const r = el.getBoundingClientRect();
+      tx = (e.clientX - (r.left + r.width / 2)) / window.innerWidth;
+      ty = (e.clientY - (r.top + r.height / 2)) / window.innerHeight;
+    };
+
+    const loop = () => {
+      cx += (tx - cx) * 0.055;
+      cy += (ty - cy) * 0.055;
+      el.style.setProperty("--px", `${(cx * 22).toFixed(2)}px`);
+      el.style.setProperty("--py", `${(cy * 16).toFixed(2)}px`);
+      el.style.setProperty("--rx", `${(-cy * 7).toFixed(2)}deg`);
+      el.style.setProperty("--ry", `${(cx * 9).toFixed(2)}deg`);
+      raf = window.requestAnimationFrame(loop);
+    };
+
+    window.addEventListener("pointermove", onMove, { passive: true });
+    raf = window.requestAnimationFrame(loop);
+    return () => {
+      window.cancelAnimationFrame(raf);
+      window.removeEventListener("pointermove", onMove);
+    };
+  }, []);
 
   return (
     <div
@@ -67,14 +155,17 @@ function HoloPortrait() {
       style={{ ["--portraitMask" as any]: `url(${src})` }}
       aria-label="Hologram portrait"
     >
-      <img
-        className={styles.portraitImg}
-        src={src}
-        alt="Hologram portrait"
-        loading="eager"
-        decoding="async"
-      />
-      <div className={styles.portraitScan} aria-hidden="true" />
+      <div className={styles.portraitTilt} ref={wrapRef}>
+        <img
+          className={styles.portraitImg}
+          src={src}
+          alt="Hologram portrait"
+          loading="eager"
+          decoding="async"
+        />
+        <div className={styles.portraitScan} aria-hidden="true" />
+        <div className={styles.portraitBeam} aria-hidden="true" />
+      </div>
     </div>
   );
 }
@@ -117,6 +208,32 @@ function IconLinkedIn() {
         fill="rgba(255,255,255,0.85)"
       />
     </svg>
+  );
+}
+
+/** Cycles the role line, decoding each new one into place. */
+function RoleRotator({ items }: { items: string[] }) {
+  const [i, setI] = useState(0);
+
+  useEffect(() => {
+    const t = window.setInterval(
+      () => setI((v) => (v + 1) % items.length),
+      3000
+    );
+    return () => window.clearInterval(t);
+  }, [items.length]);
+
+  return (
+    <div className={`${styles.roleLine} ${styles.mono}`} aria-live="polite">
+      <span className={styles.roleBracket}>[</span>
+      <ScrambleText
+        key={i}
+        text={items[i]}
+        trigger="mount"
+        className={styles.roleText}
+      />
+      <span className={styles.roleBracket}>]</span>
+    </div>
   );
 }
 
@@ -220,6 +337,7 @@ function Section({
   id,
   navLabel,
   label,
+  index,
   title,
   subtitle,
   children,
@@ -227,7 +345,8 @@ function Section({
   id: string;
   navLabel: string;
   label: string;
-  title: string;
+  index: string;
+  title?: string;
   subtitle?: string;
   children: React.ReactNode;
 }) {
@@ -239,8 +358,16 @@ function Section({
   return (
     <section id={id} ref={ref} className={styles.section} aria-label={navLabel}>
       <div className={`${styles.reveal} ${inView ? styles.inView : ""}`}>
-        <div className={styles.h2}>{label}</div>
-        <div className={styles.h3}>{title}</div>
+        <div className={styles.h2Row}>
+          <div className={styles.h2}>
+            <ScrambleText text={label} trigger="view" />
+          </div>
+          <div className={styles.h2Rule} aria-hidden="true" />
+          <div className={`${styles.h2Index} ${styles.mono}`} aria-hidden="true">
+            {index}
+          </div>
+        </div>
+        {title ? <div className={styles.h3}>{title}</div> : null}
         {subtitle ? <div className={styles.hint}>{subtitle}</div> : null}
         {children}
       </div>
@@ -248,16 +375,54 @@ function Section({
   );
 }
 
-export default function Page() {
-  const sectionIds = ["home", "about", "experiences", "projects", "gallery", "contact"] as const;
-  const active = useSectionSpy([...sectionIds]);
+const SECTIONS = [
+  { id: "home", label: "home" },
+  { id: "about", label: "about" },
+  { id: "experiences", label: "experience" },
+  { id: "projects", label: "projects" },
+  { id: "credentials", label: "credentials" },
+  { id: "gallery", label: "gallery" },
+  { id: "contact", label: "contact" },
+];
 
+export default function Page() {
+  const sectionIds = useMemo(() => SECTIONS.map((s) => s.id), []);
+  const active = useSectionSpy(sectionIds);
+
+  /* ---------- interactive layer state ---------- */
+  const [booted, setBooted] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [fieldOn, setFieldOn] = useState(true);
+  const [cursorOn, setCursorOn] = useState(true);
+  const [gridOn, setGridOn] = useState(false);
+  const [radarOn, setRadarOn] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+
+  const say = useCallback((msg: string) => {
+    setToast(msg);
+    window.setTimeout(() => setToast(null), 1900);
+  }, []);
+
+  const fireRadar = useCallback(() => {
+    setRadarOn(true);
+    say("radar sweep engaged");
+    window.setTimeout(() => setRadarOn(false), 4800);
+  }, [say]);
+
+  useTypedCode("radar", fireRadar);
+
+  const go = useCallback((id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+
+  /* ---------- hero typewriter (waits for boot) ---------- */
   const fullGreeting = `${hero.greetingPrefix} ${hero.name} ${hero.greetingSuffix}`;
   const prefixLen = `${hero.greetingPrefix} `.length;
   const nameLen = hero.name.length;
 
   const [typedLen, setTypedLen] = useState(0);
   useEffect(() => {
+    if (!booted) return;
     let idx = 0;
     const t = window.setInterval(() => {
       idx += 1;
@@ -265,7 +430,7 @@ export default function Page() {
       if (idx >= fullGreeting.length) window.clearInterval(t);
     }, 58);
     return () => window.clearInterval(t);
-  }, [fullGreeting.length]);
+  }, [booted, fullGreeting.length]);
 
   const typedAll = fullGreeting.slice(0, typedLen);
   const typedPrefix = typedAll.slice(0, Math.min(prefixLen, typedAll.length));
@@ -274,6 +439,7 @@ export default function Page() {
 
   const [activeExp, setActiveExp] = useState(0);
   const exp = experience[Math.max(0, Math.min(activeExp, experience.length - 1))];
+  const expIsCurrent = /present/i.test(exp.time);
 
   const [activeProject, setActiveProject] = useState(0);
   const proj = projects[Math.max(0, Math.min(activeProject, projects.length - 1))];
@@ -281,9 +447,152 @@ export default function Page() {
   const [activeGallery, setActiveGallery] = useState(0);
   const gItem = gallery[Math.max(0, Math.min(activeGallery, gallery.length - 1))];
 
+  /* ---------- command palette ---------- */
+  const commands = useMemo<Command[]>(() => {
+    const nav: Command[] = SECTIONS.map((s) => ({
+      id: `nav-${s.id}`,
+      group: "navigate",
+      label: s.label,
+      icon: "→",
+      keywords: s.id,
+      run: () => go(s.id),
+    }));
+
+    const linkCmds: Command[] = [
+      {
+        id: "link-email",
+        group: "links",
+        label: "email anuj",
+        icon: "@",
+        keywords: "mail contact reach out",
+        run: () => {
+          window.location.href = links.email;
+        },
+      },
+      {
+        id: "link-copy",
+        group: "links",
+        label: "copy email address",
+        icon: "⧉",
+        keywords: "clipboard copy mail",
+        run: async () => {
+          try {
+            await navigator.clipboard.writeText(
+              links.email.replace("mailto:", "")
+            );
+            say("email copied to clipboard");
+          } catch {
+            say("clipboard blocked — sorry!");
+          }
+        },
+      },
+      {
+        id: "link-github",
+        group: "links",
+        label: "open github",
+        icon: "◈",
+        keywords: "code repos source",
+        run: () => window.open(links.github, "_blank", "noreferrer"),
+      },
+      {
+        id: "link-linkedin",
+        group: "links",
+        label: "open linkedin",
+        icon: "in",
+        keywords: "profile network",
+        run: () => window.open(links.linkedin, "_blank", "noreferrer"),
+      },
+    ];
+
+    const systemCmds: Command[] = [
+      {
+        id: "fx-field",
+        group: "system",
+        label: `${fieldOn ? "disable" : "enable"} neural field`,
+        icon: "◉",
+        keywords: "particles background canvas performance",
+        run: () => {
+          setFieldOn((v) => !v);
+          say(fieldOn ? "neural field off" : "neural field on");
+        },
+      },
+      {
+        id: "fx-cursor",
+        group: "system",
+        label: `${cursorOn ? "disable" : "enable"} cursor reticle`,
+        icon: "✛",
+        keywords: "pointer glow crosshair",
+        run: () => {
+          setCursorOn((v) => !v);
+          say(cursorOn ? "reticle off" : "reticle on");
+        },
+      },
+      {
+        id: "fx-grid",
+        group: "system",
+        label: `${gridOn ? "hide" : "show"} blueprint grid`,
+        icon: "▦",
+        keywords: "wireframe overlay lines",
+        run: () => {
+          setGridOn((v) => !v);
+        },
+      },
+      {
+        id: "fx-radar",
+        group: "system",
+        label: "run radar sweep",
+        icon: "◎",
+        keywords: "ppi scope easter egg",
+        hint: "type: radar",
+        run: fireRadar,
+      },
+      {
+        id: "fx-top",
+        group: "system",
+        label: "scroll to top",
+        icon: "↑",
+        keywords: "home start",
+        run: () => window.scrollTo({ top: 0, behavior: "smooth" }),
+      },
+    ];
+
+    return [...nav, ...linkCmds, ...systemCmds];
+  }, [go, say, fireRadar, fieldOn, cursorOn, gridOn]);
+
   return (
     <main className={styles.shell}>
       <div className={styles.bg} />
+      <NeuralField enabled={fieldOn} />
+      {gridOn ? <GridOverlay /> : null}
+      {radarOn ? <RadarSweep /> : null}
+
+      <ScrollProgress />
+      <CursorGlow enabled={cursorOn} />
+      <SectionSpine sections={SECTIONS} active={active} />
+      <BootSequence onDone={() => setBooted(true)} />
+
+      <CommandPalette
+        open={paletteOpen}
+        onOpenChange={setPaletteOpen}
+        commands={commands}
+      />
+
+      <button
+        type="button"
+        className={`${fx.kbdHint} ${fx.mono}`}
+        onClick={() => setPaletteOpen(true)}
+        aria-label="Open command palette"
+      >
+        <span className={fx.kbd}>⌘</span>
+        <span className={fx.kbd}>K</span>
+        <span>command palette</span>
+      </button>
+
+      {toast ? (
+        <div className={`${styles.toast} ${styles.mono}`} role="status">
+          {toast}
+        </div>
+      ) : null}
 
       <div className={styles.topbar}>
         <div className={styles.topbarFrame}>
@@ -298,20 +607,27 @@ export default function Page() {
               <Link href="#about" data-active={active === "about"}>About</Link>
               <Link href="#experiences" data-active={active === "experiences"}>Experience</Link>
               <Link href="#projects" data-active={active === "projects"}>Projects</Link>
+              <Link href="#credentials" data-active={active === "credentials"}>Credentials</Link>
               <Link href="#gallery" data-active={active === "gallery"}>Gallery</Link>
               <Link href="#contact" data-active={active === "contact"}>Contact</Link>
             </nav>
 
             <div className={styles.iconRow} aria-label="External links">
-              <Link className={styles.iconBtn} href={links.email} aria-label="Email" title="Email">
-                <IconMail />
-              </Link>
-              <Link className={styles.iconBtn} href={links.github} target="_blank" rel="noreferrer" aria-label="GitHub" title="GitHub">
-                <IconGitHub />
-              </Link>
-              <Link className={styles.iconBtn} href={links.linkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn" title="LinkedIn">
-                <IconLinkedIn />
-              </Link>
+              <Magnetic strength={0.28}>
+                <Link className={styles.iconBtn} href={links.email} aria-label="Email" title="Email">
+                  <IconMail />
+                </Link>
+              </Magnetic>
+              <Magnetic strength={0.28}>
+                <Link className={styles.iconBtn} href={links.github} target="_blank" rel="noreferrer" aria-label="GitHub" title="GitHub">
+                  <IconGitHub />
+                </Link>
+              </Magnetic>
+              <Magnetic strength={0.28}>
+                <Link className={styles.iconBtn} href={links.linkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn" title="LinkedIn">
+                  <IconLinkedIn />
+                </Link>
+              </Magnetic>
             </div>
           </div>
         </div>
@@ -330,20 +646,78 @@ export default function Page() {
                 <span className={styles.cursor} />
               </div>
 
+              <RoleRotator items={roles} />
+
               <div className={styles.heroIntro}>
-                I’m a <span className={styles.accent}>Computer Science</span> student at Purdue University with a concentration in{" "}
-                <span className={styles.accent}>Machine Learning</span>. I enjoy learning the problems different industries face and buliding{" "}
-                <span className={styles.accent}>data-driven</span> solutions to try my best in solving them.
+                I’m a <span className={styles.accent}>Computer Science</span> student at Purdue
+                building <span className={styles.accent}>machine learning systems</span> for the{" "}
+                <span className={styles.accent}>defense</span> world — OSINT ingestion, hybrid
+                retrieval, and decision-support models that hold up in production.
               </div>
 
               <div className={styles.heroSub}>
-                This is my little corner of the internet - projects, experiments, certificates, and whatever I’m learning along the way.
+                This is my little corner of the internet — projects, experiments, research, and
+                whatever I’m learning along the way.
+              </div>
+
+              <div className={styles.chips}>
+                {statusChips.map((c) => (
+                  <span
+                    key={c.label}
+                    className={`${styles.chip} ${
+                      c.tone === "cyan"
+                        ? styles.chipCyan
+                        : c.tone === "green"
+                        ? styles.chipGreen
+                        : ""
+                    }`}
+                  >
+                    <span className={styles.chipDot} aria-hidden="true" />
+                    {c.label}
+                  </span>
+                ))}
+              </div>
+
+              <div className={styles.ctaRow}>
+                <Magnetic strength={0.22}>
+                  <button
+                    type="button"
+                    className={styles.primaryBtn}
+                    onClick={() => go("experiences")}
+                  >
+                    see the work →
+                  </button>
+                </Magnetic>
+                <Magnetic strength={0.22}>
+                  <button
+                    type="button"
+                    className={styles.ghostBtn}
+                    onClick={() => setPaletteOpen(true)}
+                  >
+                    <span className={fx.kbd}>⌘K</span> jump anywhere
+                  </button>
+                </Magnetic>
               </div>
             </div>
           </div>
+
+          <div className={styles.telemetry} aria-label="Quick stats">
+            {telemetry.map((t) => (
+              <div key={t.label} className={styles.telItem}>
+                <div className={styles.telValue}>
+                  <Counter
+                    value={t.value}
+                    decimals={t.decimals}
+                    suffix={t.suffix}
+                  />
+                </div>
+                <div className={styles.telLabel}>{t.label}</div>
+              </div>
+            ))}
+          </div>
         </header>
 
-        <Section id="about" navLabel="About" label="/about_me" title="" subtitle="">
+        <Section id="about" navLabel="About" label="/about_me" index="01">
           <div
             className={styles.aboutSplit}
             style={{
@@ -356,77 +730,75 @@ export default function Page() {
             <div className={`${styles.panel} ${styles.aboutPanel}`} style={{ width: "100%", maxWidth: "unset" }}>
               <div style={{ color: "rgba(255,255,255,0.74)", lineHeight: 1.85, maxWidth: "78ch" }}>
                 <p style={{ margin: 0 }}>
-                  I’m currently a ML Data Engineer at Team ACP Racing where I'm building a Python ETL pipeline to capture live data to conduct race strategy adjustments.
+                  I’m an ML Systems Engineer Intern at a stealth defense market-intelligence
+                  startup in Quantico, where I build OSINT ingestion and hybrid retrieval that
+                  feeds an LLM judge.
                 </p>
                 <p style={{ margin: "12px 0 0 0" }}>
-                  I'm currently in my junior year pursuing my bachelors in Computer Science at Purdue University.
+                  Before that I was an MLOps intern at U.S. Marine Corps Systems Command, taking
+                  decision-support models from prototype to production on Databricks — and before
+                  that, streaming live race telemetry through Kafka and Flink for a World Racing
+                  League team.
+                </p>
+                <p style={{ margin: "12px 0 0 0" }}>
+                  I’m in my junior year of a B.S. in Computer Science at Purdue. On the side I
+                  train self-supervised energy models that judge whether an image actually holds
+                  together.
                 </p>
 
                 <div
                   style={{
-                    marginTop: 14,
+                    marginTop: 18,
                     paddingLeft: 12,
                     borderLeft: "3px solid rgba(86, 198, 255, 0.9)",
                     color: "rgba(255,255,255,0.82)",
                   }}
                 >
-                  <span className={styles.accent}>Here are some technologies I work with often:</span>
+                  <span className={styles.accent}>The stack I reach for:</span>
                 </div>
 
-                <div
-                  style={{
-                    marginTop: 12,
-                    display: "grid",
-                    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-                    gap: 12,
-                    color: "rgba(255,255,255,0.72)",
-                  }}
-                >
-                  <ul style={{ margin: 0, paddingLeft: 50, listStyle: "none" }}>
-                    <li style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 0" }}>
-                      <span className={styles.dot} aria-hidden="true" />
-                      Python
-                    </li>
-                    <li style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 0" }}>
-                      <span className={styles.dot} aria-hidden="true" />
-                      Pandas / NumPy
-                    </li>
-                    <li style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 0" }}>
-                      <span className={styles.dot} aria-hidden="true" />
-                      scikit-learn
-                    </li>
-                  </ul>
-
-                  <ul style={{ margin: 0, paddingLeft: 0, listStyle: "none" }}>
-                    <li style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 0" }}>
-                      <span className={styles.dot} aria-hidden="true" />
-                      PyTorch
-                    </li>
-                    <li style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 0" }}>
-                      <span className={styles.dot} aria-hidden="true" />
-                      SQL
-                    </li>
-                    <li style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 0" }}>
-                      <span className={styles.dot} aria-hidden="true" />
-                      R
-                    </li>
-                  </ul>
+                <div className={styles.skillGrid}>
+                  {skillGroups.map((g, i) => (
+                    <Rise key={g.name} delay={i * 70}>
+                      <div className={styles.skillGroup}>
+                        <div className={`${styles.skillGroupName} ${styles.mono}`}>
+                          {g.name}
+                        </div>
+                        <div className={styles.skillItems}>
+                          {g.items.map((it) => (
+                            <span key={it} className={styles.tag}>
+                              {it}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </Rise>
+                  ))}
                 </div>
 
-                <p style={{ margin: "14px 0 0 0", color: "rgba(255,255,255,0.70)" }}>
-                  Outside of work, you’ll usually find me hiking, playing anything that involves a racket or paddle, and catching Steelers games. Oh! I'm also an avid mixologist.
+                <p style={{ margin: "18px 0 0 0", color: "rgba(255,255,255,0.70)" }}>
+                  Outside of work, you’ll usually find me hiking, playing anything that involves a
+                  racket or paddle, and catching Steelers games. Oh! I&apos;m also an avid
+                  mixologist.
                 </p>
               </div>
             </div>
 
             {/* Image: on background (NOT inside the glass panel) */}
             <div className={styles.aboutPhotoWrap} aria-label="Portrait">
-              <img className={styles.aboutPhoto} src="/portraits/me.png" alt="Portrait" loading="lazy" decoding="async" />
+              <Tilt max={6} scale={1.02} className={styles.aboutPhotoTilt}>
+                <img className={styles.aboutPhoto} src="/portraits/me.png" alt="Portrait" loading="lazy" decoding="async" />
+              </Tilt>
             </div>
+          </div>
+
+          <div className={styles.skillMarquees}>
+            <Marquee items={skillTicker} duration={52} />
+            <Marquee items={[...skillTicker].reverse()} duration={62} reverse />
           </div>
         </Section>
 
-        <Section id="experiences" navLabel="Experiences" label="/experiences" title="" subtitle="">
+        <Section id="experiences" navLabel="Experiences" label="/experiences" index="02">
           <div className={styles.expSplit}>
             <div className={styles.expIndex} aria-label="Experience index">
               {experience.map((e, idx) => (
@@ -435,13 +807,16 @@ export default function Page() {
                   className={`${styles.expItem} ${idx === activeExp ? styles.expItemActive : ""}`}
                   onClick={() => setActiveExp(idx)}
                 >
+                  <span className={`${styles.expNum} ${styles.mono}`}>
+                    {String(idx + 1).padStart(2, "0")}
+                  </span>
                   <div className={styles.expOneLine}>{e.orglabel}</div>
                 </button>
               ))}
             </div>
 
             <div className={styles.expDetail} aria-label="Experience details">
-              {/* ✅ Animated wrapper: key changes every selection so the animation replays */}
+              {/* Animated wrapper: key changes every selection so the animation replays */}
               <div
                 key={activeExp}
                 style={{
@@ -455,9 +830,17 @@ export default function Page() {
                     <div className={styles.expTitle}>{exp.role}</div>
                     <div className={styles.expOrgLine}>{exp.org}</div>
                   </div>
-                  <div className={styles.mono} style={{ color: "rgba(255,255,255,0.50)", fontSize: 12 }}>
-                    {exp.time}
-                    {exp.location ? ` · ${exp.location}` : ""}
+                  <div className={`${styles.expMeta} ${styles.mono}`}>
+                    {expIsCurrent ? (
+                      <span className={styles.expLive}>
+                        <span className={styles.expLiveDot} aria-hidden="true" />
+                        active
+                      </span>
+                    ) : null}
+                    <span>
+                      {exp.time}
+                      {exp.location ? ` · ${exp.location}` : ""}
+                    </span>
                   </div>
                 </div>
 
@@ -483,7 +866,7 @@ export default function Page() {
 
                 {exp.links?.length ? (
                   <div style={{ marginTop: 10, display: "flex", gap: 12, flexWrap: "wrap" }}>
-                    {exp.links.map((l) => (
+                    {exp.links.map((l: { href: string; label: string }) => (
                       <Link key={l.href} href={l.href} target="_blank" rel="noreferrer" className={styles.inlineLink}>
                         {l.label} →
                       </Link>
@@ -495,18 +878,20 @@ export default function Page() {
           </div>
         </Section>
 
-        <Section id="projects" navLabel="Projects" label="/projects" title="" subtitle="">
+        <Section id="projects" navLabel="Projects" label="/projects" index="03">
           <div className={styles.projShelf}>
             <div className={styles.projRail} aria-label="Project shelf">
               {projects.map((p, idx) => (
-                <div
+                <Tilt
                   key={p.title}
+                  max={8}
+                  scale={1.02}
                   className={styles.projCard}
                   role="button"
                   tabIndex={0}
                   aria-label={`Select project: ${p.title}`}
                   onClick={() => setActiveProject(idx)}
-                  onKeyDown={(e) => {
+                  onKeyDown={(e: React.KeyboardEvent) => {
                     if (e.key === "Enter" || e.key === " ") setActiveProject(idx);
                   }}
                 >
@@ -520,7 +905,7 @@ export default function Page() {
                     ))}
                   </div>
                   <div className={styles.projOpenHint}>{idx === activeProject ? "selected" : "click"}</div>
-                </div>
+                </Tilt>
               ))}
             </div>
 
@@ -557,11 +942,78 @@ export default function Page() {
           </div>
         </Section>
 
-        <Section id="gallery" navLabel="Gallery" label="/film_strip" title="" subtitle="">
+        <Section id="credentials" navLabel="Credentials" label="/credentials" index="04">
+          <div className={styles.eduGrid}>
+            <Rise>
+              <div className={styles.eduCard}>
+                <div className={styles.eduSchool}>{profile.school}</div>
+                <div className={styles.eduDegree}>{profile.degree}</div>
+
+                <div style={{ marginTop: 14 }}>
+                  <div className={styles.eduRow}>
+                    <span className={`${styles.eduKey} ${styles.mono}`}>graduation</span>
+                    <span className={styles.eduVal}>{profile.grad}</span>
+                  </div>
+                  <div className={styles.eduRow}>
+                    <span className={`${styles.eduKey} ${styles.mono}`}>gpa</span>
+                    <span className={styles.eduVal}>{profile.gpa} / 4.00</span>
+                  </div>
+                  <div className={styles.eduRow}>
+                    <span className={`${styles.eduKey} ${styles.mono}`}>location</span>
+                    <span className={styles.eduVal}>{profile.location}</span>
+                  </div>
+                  <div className={styles.eduRow}>
+                    <span className={`${styles.eduKey} ${styles.mono}`}>clearance</span>
+                    <span className={styles.eduVal}>
+                      {profile.clearance} · {profile.citizenship}
+                    </span>
+                  </div>
+                </div>
+
+                <div style={{ marginTop: 18 }}>
+                  <div className={`${styles.skillGroupName} ${styles.mono}`}>
+                    relevant coursework
+                  </div>
+                  <div className={styles.courseChips}>
+                    {coursework.map((c) => (
+                      <span key={c} className={styles.courseChip}>
+                        {c}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </Rise>
+
+            <div>
+              <div className={`${styles.skillGroupName} ${styles.mono}`} style={{ marginBottom: 12 }}>
+                awards · leadership · licenses
+              </div>
+              <div className={styles.credList}>
+                {credentials.map((c, i) => (
+                  <Rise key={c.title} delay={i * 80}>
+                    <div className={styles.credItem}>
+                      <span className={`${styles.credMark} ${styles.mono}`} aria-hidden="true">
+                        ▸
+                      </span>
+                      <div>
+                        <div className={styles.credTitle}>{c.title}</div>
+                        <div className={styles.credDetail}>{c.detail}</div>
+                      </div>
+                    </div>
+                  </Rise>
+                ))}
+              </div>
+            </div>
+          </div>
+        </Section>
+
+        <Section id="gallery" navLabel="Gallery" label="/film_strip" index="05">
           <div className={styles.gallerySplit} aria-label="Gallery">
             {/* Left: big preview */}
             <div className={styles.galleryPreview} aria-label={`Preview: ${gItem.title}`}>
               <img
+                key={gItem.src}
                 className={styles.galleryPreviewImg}
                 src={gItem.src}
                 alt={gItem.title}
@@ -597,18 +1049,27 @@ export default function Page() {
           </div>
         </Section>
 
-        <Section id="contact" navLabel="Contact" label="/say_hi!" title="" subtitle="">
+        <Section id="contact" navLabel="Contact" label="/say_hi!" index="06">
           <div className={styles.contactStack}>
             <div className={styles.contactWide}>
               <div>
                 <div className={styles.contactEmail}>anujshah7567@gmail.com</div>
-                <div className={styles.contactNote}>Feel free to reach out - I'll reply when I can.</div>
+                <div className={styles.contactNote}>
+                  {profile.objective} Also reachable at shah1054@purdue.edu — I&apos;ll reply
+                  when I can.
+                </div>
               </div>
 
               <div className={styles.contactActions}>
-                <Link className={styles.pillBtn} href={links.email}>Email</Link>
-                <Link className={styles.pillBtn} href={links.github} target="_blank" rel="noreferrer">GitHub</Link>
-                <Link className={styles.pillBtn} href={links.linkedin} target="_blank" rel="noreferrer">LinkedIn</Link>
+                <Magnetic strength={0.25}>
+                  <Link className={styles.pillBtn} href={links.email}>Email</Link>
+                </Magnetic>
+                <Magnetic strength={0.25}>
+                  <Link className={styles.pillBtn} href={links.github} target="_blank" rel="noreferrer">GitHub</Link>
+                </Magnetic>
+                <Magnetic strength={0.25}>
+                  <Link className={styles.pillBtn} href={links.linkedin} target="_blank" rel="noreferrer">LinkedIn</Link>
+                </Magnetic>
               </div>
             </div>
 
@@ -619,11 +1080,11 @@ export default function Page() {
         </Section>
 
         <footer className={styles.footer}>
-          <span>© {new Date().getFullYear()} Anuj</span>
+          <span>© {new Date().getFullYear()} Anuj · try typing “radar”</span>
         </footer>
       </div>
 
-      {/* ✅ Keyframes injected from page.tsx so you don't need to touch CSS */}
+      {/* Keyframes injected here so the experience panel animation stays with the markup */}
       <style jsx global>{`
         @keyframes expRevealFromDivider {
           0% {
